@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Loading Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 20px;
+        }
+        .log {
+            background: #000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .info { color: #0ff; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Asset Loading Test</h1>
+    <p>Testing if game assets can be loaded...</p>
+
+    <div id="status"></div>
+    <div class="log" id="log"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+
+        function addLog(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        async function testAssetLoading() {
+            addLog('🔄 Starting asset loading test...');
+
+            // Test 1: Load a simple 3D model
+            const loader = new GLTFLoader();
+            const testModel = 'Low_poly_stylized_sol_1028213834_texture.glb';
+
+            try {
+                addLog(`🔄 Attempting to load: ${testModel}`);
+
+                const gltf = await new Promise((resolve, reject) => {
+                    loader.load(
+                        `/${testModel}`,
+                        resolve,
+                        (progress) => {
+                            const percent = (progress.loaded / progress.total * 100).toFixed(1);
+                            addLog(`   Loading... ${percent}%`, 'info');
+                        },
+                        reject
+                    );
+                });
+
+                addLog(`✅ SUCCESS! Model loaded:  ${gltf.scene.children.length} objects`, 'success');
+                status.innerHTML = '<h2 style="color:#0f0">✅ Assets are loading correctly!</h2>';
+
+            } catch (error) {
+                addLog(`❌ FAILED to load model: ${error.message}`, 'error');
+                addLog(`   Error details: ${error}`, 'error');
+                status.innerHTML = '<h2 style="color:#f00">❌ Asset loading failed!</h2>';
+            }
+
+            // Test 2: Load an audio file
+            try {
+                addLog(`🔄 Testing audio file: game_music.webm`);
+                const response = await fetch('/game_music.webm');
+
+                if (response.ok) {
+                    addLog(`✅ Audio file accessible (${response.headers.get('content-type')})`, 'success');
+                } else {
+                    addLog(`❌ Audio file not accessible: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Failed to fetch audio: ${error.message}`, 'error');
+            }
+
+            addLog('🏁 Test complete!');
+        }
+
+        // Run test
+        testAssetLoading();
+    </script>
+</body>
+</html>

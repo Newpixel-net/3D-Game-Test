@@ -104,8 +104,11 @@ export class Player {
             }
         }
 
-        // Movement
-        this.updateMovement(deltaTime, inputManager);
+        // Movement (returns isMoving for camera bob)
+        const isMoving = this.updateMovement(deltaTime, inputManager);
+
+        // Update camera with movement state
+        this.game.sceneManager.updateCamera(deltaTime, inputManager, isMoving);
 
         // Shooting
         if (!this.isReloading && inputManager.isShootPressed()) {
@@ -132,37 +135,34 @@ export class Player {
     updateMovement(deltaTime, inputManager) {
         const movement = inputManager.getMovementInput();
 
-        // Calculate movement direction relative to camera
-        const cameraDirection = new THREE.Vector3(0, 0, -1);
-        cameraDirection.applyQuaternion(this.game.sceneManager.camera.quaternion);
-        cameraDirection.y = 0;
-        cameraDirection.normalize();
+        // Get camera-relative directions
+        const cameraForward = this.game.sceneManager.getCameraForward();
+        const cameraRight = this.game.sceneManager.getCameraRight();
 
-        const cameraRight = new THREE.Vector3(1, 0, 0);
-        cameraRight.applyQuaternion(this.game.sceneManager.camera.quaternion);
-        cameraRight.y = 0;
-        cameraRight.normalize();
-
-        // Calculate movement vector
+        // Calculate movement vector relative to camera
         this.direction.set(0, 0, 0);
-        this.direction.addScaledVector(cameraDirection, movement.y);
-        this.direction.addScaledVector(cameraRight, movement.x);
-        this.direction.normalize();
+        this.direction.addScaledVector(cameraForward, movement.y);  // Forward/back
+        this.direction.addScaledVector(cameraRight, movement.x);     // Strafe left/right
+
+        const isMoving = this.direction.length() > 0;
 
         // Apply movement
-        if (this.direction.length() > 0) {
+        if (isMoving) {
+            this.direction.normalize();
             this.velocity.copy(this.direction).multiplyScalar(this.speed);
             this.mesh.position.addScaledVector(this.velocity, deltaTime);
-
-            // Rotate player to face movement direction
-            this.rotationAngle = Math.atan2(this.direction.x, this.direction.z);
-            this.mesh.rotation.y = this.rotationAngle;
         }
+
+        // Player always faces camera direction (not movement direction - modern TPS style)
+        const cameraRotation = this.game.sceneManager.getCameraRotationY();
+        this.mesh.rotation.y = cameraRotation;
 
         // Keep player in bounds
         const arenaSize = GAME_CONFIG.ARENA.SIZE / 2 - 2;
         this.mesh.position.x = Math.max(-arenaSize, Math.min(arenaSize, this.mesh.position.x));
         this.mesh.position.z = Math.max(-arenaSize, Math.min(arenaSize, this.mesh.position.z));
+
+        return isMoving;
     }
 
     shoot() {
@@ -181,12 +181,12 @@ export class Player {
         const shootSound = 'guillotine_' + (Math.ceil(Math.random() * 5));
         this.game.audioSystem.playSound(shootSound, this.mesh.position);
 
-        // Raycast to check for hits
-        const origin = this.mesh.position.clone();
-        origin.y = 1.5; // Shoot from chest height
+        // Shoot from camera center (more accurate for TPS)
+        const origin = this.game.sceneManager.camera.position.clone();
 
-        const direction = new THREE.Vector3(0, 0, 1);
-        direction.applyQuaternion(this.mesh.quaternion);
+        // Get direction from camera (where player is looking)
+        const cameraForward = this.game.sceneManager.getCameraForward();
+        const direction = cameraForward.clone();
 
         // Add spread
         const spread = GAME_CONFIG.PLAYER.WEAPON.SPREAD;
@@ -215,10 +215,12 @@ export class Player {
             }
         }
 
-        // Camera shake
+        // Camera shake with recoil direction (kick back and up)
+        const recoilDirection = new THREE.Vector3(0, 0.3, -0.2);
         this.game.sceneManager.shakeCamera(
-            GAME_CONFIG.EFFECTS.SCREEN_SHAKE.INTENSITY_SHOOT,
-            0.1
+            GAME_CONFIG.EFFECTS.SCREEN_SHAKE.INTENSITY_SHOOT * 2,
+            0.15,
+            recoilDirection
         );
 
         // Auto-reload if magazine empty

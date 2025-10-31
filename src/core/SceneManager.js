@@ -12,19 +12,33 @@ export class SceneManager {
         this.renderer = null;
         this.canvas = null;
 
-        // Camera settings
-        this.cameraDistance = 25;
-        this.cameraHeight = 15;
-        this.cameraAngle = Math.PI / 6; // 30 degrees
+        // Modern third-person camera settings
+        this.cameraDistance = 6;        // Much closer for TPS
+        this.cameraHeight = 2.5;        // Shoulder height
+        this.cameraSideOffset = 1.2;    // Over-the-shoulder offset
+        this.cameraLerpSpeed = 0.15;    // Smooth but responsive
+
+        // Camera rotation (controlled by mouse)
+        this.cameraRotationY = 0;       // Horizontal rotation
+        this.cameraRotationX = 0.3;     // Vertical rotation (pitch)
+        this.minPitch = -0.5;           // Look down limit
+        this.maxPitch = 1.2;            // Look up limit
+
+        // Mouse sensitivity
+        this.mouseSensitivity = 0.002;
 
         // Player target for camera follow
         this.playerTarget = null;
-        this.cameraOffset = new THREE.Vector3(0, this.cameraHeight, this.cameraDistance);
-        this.cameraLookAtOffset = new THREE.Vector3(0, 2, 0);
+        this.cameraLookAtOffset = new THREE.Vector3(0, 1.6, 0); // Eye level
 
-        // Camera shake
+        // Camera shake with direction
         this.shakeIntensity = 0;
         this.shakeDuration = 0;
+        this.shakeDirection = new THREE.Vector3();
+
+        // Camera bob for movement feel
+        this.bobIntensity = 0;
+        this.bobSpeed = 0;
     }
 
     initialize() {
@@ -222,35 +236,108 @@ export class SceneManager {
         this.playerTarget = playerMesh;
     }
 
-    updateCamera(deltaTime) {
+    updateCamera(deltaTime, inputManager, isMoving = false) {
         if (!this.playerTarget) return;
 
-        // Smooth camera follow
-        const targetPosition = this.playerTarget.position.clone();
-        const desiredPosition = targetPosition.clone().add(this.cameraOffset);
+        // Update camera rotation from mouse input (if pointer is locked)
+        if (inputManager && inputManager.pointerLocked && inputManager.mouse.deltaX !== undefined) {
+            this.cameraRotationY -= inputManager.mouse.deltaX * this.mouseSensitivity;
+            this.cameraRotationX -= inputManager.mouse.deltaY * this.mouseSensitivity;
 
-        // Lerp camera position
-        this.camera.position.lerp(desiredPosition, 0.1);
+            // Clamp vertical rotation
+            this.cameraRotationX = Math.max(this.minPitch, Math.min(this.maxPitch, this.cameraRotationX));
 
-        // Look at player with offset
-        const lookAtTarget = targetPosition.clone().add(this.cameraLookAtOffset);
+            // Reset mouse deltas
+            inputManager.mouse.deltaX = 0;
+            inputManager.mouse.deltaY = 0;
+        }
+
+        // Calculate camera position based on rotation
+        const playerPos = this.playerTarget.position.clone();
+
+        // Calculate offset based on camera rotation
+        const horizontalDistance = this.cameraDistance * Math.cos(this.cameraRotationX);
+        const verticalDistance = this.cameraDistance * Math.sin(this.cameraRotationX);
+
+        const offsetX = Math.sin(this.cameraRotationY) * horizontalDistance +
+                       Math.cos(this.cameraRotationY) * this.cameraSideOffset;
+        const offsetZ = Math.cos(this.cameraRotationY) * horizontalDistance -
+                       Math.sin(this.cameraRotationY) * this.cameraSideOffset;
+
+        const desiredPosition = new THREE.Vector3(
+            playerPos.x - offsetX,
+            playerPos.y + this.cameraHeight + verticalDistance,
+            playerPos.z - offsetZ
+        );
+
+        // Smooth camera movement
+        this.camera.position.lerp(desiredPosition, this.cameraLerpSpeed);
+
+        // Camera bob when moving
+        if (isMoving) {
+            this.bobIntensity = Math.min(this.bobIntensity + deltaTime * 5, 1);
+            this.bobSpeed += deltaTime * 8;
+            const bobOffset = Math.sin(this.bobSpeed) * 0.05 * this.bobIntensity;
+            this.camera.position.y += bobOffset;
+        } else {
+            this.bobIntensity = Math.max(this.bobIntensity - deltaTime * 5, 0);
+        }
+
+        // Look at point ahead of player
+        const lookAtTarget = playerPos.clone().add(this.cameraLookAtOffset);
+        const lookDirection = new THREE.Vector3(
+            Math.sin(this.cameraRotationY),
+            -Math.sin(this.cameraRotationX),
+            Math.cos(this.cameraRotationY)
+        );
+        lookAtTarget.add(lookDirection.multiplyScalar(3));
+
         this.camera.lookAt(lookAtTarget);
 
-        // Apply camera shake
+        // Apply camera shake with directional bias
         if (this.shakeDuration > 0) {
             this.shakeDuration -= deltaTime;
+            const shakeProgress = this.shakeDuration / 0.3;
             const shake = new THREE.Vector3(
-                (Math.random() - 0.5) * this.shakeIntensity,
-                (Math.random() - 0.5) * this.shakeIntensity,
-                (Math.random() - 0.5) * this.shakeIntensity
+                (Math.random() - 0.5 + this.shakeDirection.x) * this.shakeIntensity * shakeProgress,
+                (Math.random() - 0.5 + this.shakeDirection.y) * this.shakeIntensity * shakeProgress,
+                (Math.random() - 0.5 + this.shakeDirection.z) * this.shakeIntensity * shakeProgress
             );
             this.camera.position.add(shake);
         }
     }
 
-    shakeCamera(intensity, duration) {
+    shakeCamera(intensity, duration, direction = null) {
         this.shakeIntensity = intensity;
         this.shakeDuration = duration;
+        if (direction) {
+            this.shakeDirection.copy(direction);
+        } else {
+            this.shakeDirection.set(0, 0, 0);
+        }
+    }
+
+    // Get camera forward direction for player movement
+    getCameraForward() {
+        return new THREE.Vector3(
+            Math.sin(this.cameraRotationY),
+            0,
+            Math.cos(this.cameraRotationY)
+        ).normalize();
+    }
+
+    // Get camera right direction for strafing
+    getCameraRight() {
+        return new THREE.Vector3(
+            Math.cos(this.cameraRotationY),
+            0,
+            -Math.sin(this.cameraRotationY)
+        ).normalize();
+    }
+
+    // Get camera rotation for player aiming
+    getCameraRotationY() {
+        return this.cameraRotationY;
     }
 
     render() {

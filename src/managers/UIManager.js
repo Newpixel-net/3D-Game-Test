@@ -11,6 +11,7 @@ export class UIManager {
 
         this.hud = document.getElementById('hud');
         this.waveIndicator = document.getElementById('waveIndicator');
+        this.crosshair = document.getElementById('crosshair');
 
         // HUD elements
         this.healthValue = document.getElementById('healthValue');
@@ -65,11 +66,13 @@ export class UIManager {
     showHUD() {
         this.hud?.classList.remove('hidden');
         this.waveIndicator?.classList.remove('hidden');
+        this.crosshair?.classList.remove('hidden');
     }
 
     hideHUD() {
         this.hud?.classList.add('hidden');
         this.waveIndicator?.classList.add('hidden');
+        this.crosshair?.classList.add('hidden');
     }
 
     updateHUD(gameState) {

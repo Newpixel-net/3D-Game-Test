@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
     root: './',
     publicDir: false,
-    base: './',
+    base: '/3D-Game-Test/',
     build: {
         outDir: 'docs',
         emptyOutDir: true,

@@ -2,13 +2,14 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     root: './',
-    publicDir: './',
+    publicDir: false,
     base: './',
     build: {
-        outDir: 'dist',
+        outDir: 'docs',
+        emptyOutDir: true,
         assetsDir: 'assets',
         sourcemap: false,
-        minify: 'terser',
+        minify: 'esbuild',
         target: 'es2015',
         rollupOptions: {
             output: {
@@ -20,10 +21,10 @@ export default defineConfig({
     },
     server: {
         port: 3000,
-        open: true,
+        open: false,
         host: true,
     },
     optimizeDeps: {
-        include: ['three', 'cannon-es', 'gsap'],
+        include: ['three'],
     },
 });

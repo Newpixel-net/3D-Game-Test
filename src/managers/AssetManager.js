@@ -77,44 +77,65 @@ export class AssetManager {
         const totalAssets = Object.keys(this.assetList.models).length +
                           Object.keys(this.assetList.sounds).length;
         let loadedAssets = 0;
+        let processedAssets = 0;
 
         console.log(`📦 Loading ${totalAssets} assets...`);
 
         // Load models
         for (const [key, filename] of Object.entries(this.assetList.models)) {
             try {
+                console.log(`🔄 Loading model: ${key} (${filename})`);
                 const model = await this.loadModel(filename);
                 this.models.set(key, model);
                 loadedAssets++;
+                processedAssets++;
 
                 if (onProgress) {
-                    onProgress((loadedAssets / totalAssets) * 100);
+                    onProgress((processedAssets / totalAssets) * 100);
                 }
 
                 console.log(`✅ Model loaded: ${key}`);
             } catch (error) {
-                console.error(`❌ Failed to load model ${key}:`, error);
+                processedAssets++;
+                console.error(`❌ Failed to load model ${key} (${filename}):`, error);
+
+                // Still update progress even on error
+                if (onProgress) {
+                    onProgress((processedAssets / totalAssets) * 100);
+                }
             }
         }
 
         // Load sounds
         for (const [key, filename] of Object.entries(this.assetList.sounds)) {
             try {
+                console.log(`🔄 Loading sound: ${key} (${filename})`);
                 const sound = await this.loadSound(filename);
                 this.sounds.set(key, sound);
                 loadedAssets++;
+                processedAssets++;
 
                 if (onProgress) {
-                    onProgress((loadedAssets / totalAssets) * 100);
+                    onProgress((processedAssets / totalAssets) * 100);
                 }
 
                 console.log(`✅ Sound loaded: ${key}`);
             } catch (error) {
-                console.error(`❌ Failed to load sound ${key}:`, error);
+                processedAssets++;
+                console.error(`❌ Failed to load sound ${key} (${filename}):`, error);
+
+                // Still update progress even on error
+                if (onProgress) {
+                    onProgress((processedAssets / totalAssets) * 100);
+                }
             }
         }
 
-        console.log('✅ All assets loaded');
+        console.log(`✅ Asset loading complete: ${loadedAssets}/${totalAssets} loaded successfully`);
+
+        if (loadedAssets === 0) {
+            throw new Error('Failed to load any assets! Check console for errors.');
+        }
     }
 
     loadModel(filename) {

@@ -140,7 +140,7 @@ export class AssetManager {
 
     loadModel(filename) {
         return new Promise((resolve, reject) => {
-            const path = `/${filename}`;
+            const path = `${import.meta.env.BASE_URL}${filename}`;
 
             this.gltfLoader.load(
                 path,
@@ -180,7 +180,7 @@ export class AssetManager {
 
     loadSound(filename) {
         return new Promise((resolve, reject) => {
-            const path = `/${filename}`;
+            const path = `${import.meta.env.BASE_URL}${filename}`;
 
             fetch(path)
                 .then(response => {

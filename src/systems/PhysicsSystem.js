@@ -60,7 +60,12 @@ export class PhysicsSystem {
         const raycaster = new THREE.Raycaster(origin, direction, 0, maxDistance);
         const intersections = raycaster.intersectObjects(objects, true);
 
-        return intersections.length > 0 ? intersections[0] : null;
+        // Filter out sprites (health bars, etc.) to prevent crashes
+        const validIntersections = intersections.filter(intersection => {
+            return !(intersection.object instanceof THREE.Sprite);
+        });
+
+        return validIntersections.length > 0 ? validIntersections[0] : null;
     }
 
     // Simple AABB collision

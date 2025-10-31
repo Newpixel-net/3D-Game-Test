@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="AAA Wave-Based Survival Shooter - Defend against endless enemy waves!">
-    <title>Survival Shooter - Wave Defense</title>
+    <meta name="description" content="Warzone - Tactical Third-Person Survival Shooter. Defend against endless enemy waves!">
+    <title>Warzone - Survival Shooter</title>
     <style>
         * {
             margin: 0;
@@ -227,8 +227,35 @@
         .menu-title {
             font-size: 3em;
             color: #00d2ff;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .menu-subtitle {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+            font-weight: normal;
+            letter-spacing: 3px;
+        }
+
+        .version-info {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(0, 210, 255, 0.2);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            margin-top: 5px;
         }
 
         .menu-button {
@@ -357,7 +384,7 @@
             }
         }
     </style>
-  <script type="module" crossorigin src="/3D-Game-Test/assets/index-r6STsPQm.js"></script>
+  <script type="module" crossorigin src="/3D-Game-Test/assets/index-8t-uz8lh.js"></script>
   <link rel="modulepreload" crossorigin href="/3D-Game-Test/assets/three-D6emPfn2.js">
 </head>
 <body>
@@ -366,7 +393,7 @@
     <!-- Loading Screen -->
     <div id="loadingScreen">
         <div class="loading-content">
-            <div class="loading-title">SURVIVAL SHOOTER</div>
+            <div class="loading-title">WARZONE</div>
             <div class="loading-bar-container">
                 <div class="loading-bar" id="loadingBar"></div>
             </div>
@@ -426,7 +453,11 @@
         <!-- Main Menu -->
         <div class="menu-overlay hidden" id="mainMenu">
             <div class="menu-panel">
-                <div class="menu-title">SURVIVAL SHOOTER</div>
+                <div class="menu-title">WARZONE</div>
+                <div class="menu-subtitle">TACTICAL SURVIVAL SHOOTER</div>
+                <div class="version-info">
+                    <span class="version-badge" id="versionDisplay">ALPHA 0.4</span>
+                </div>
                 <button class="menu-button" id="startButton">START GAME</button>
                 <button class="menu-button" id="settingsButton">SETTINGS</button>
                 <button class="menu-button" id="achievementsButton">ACHIEVEMENTS</button>

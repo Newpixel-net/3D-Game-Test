@@ -1,0 +1,23 @@
+{
+  "name": "aaa-survival-shooter",
+  "version": "1.0.0",
+  "description": "AAA Wave-Based Survival Shooter in HTML5",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["game", "shooter", "3D", "survival", "action"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "three": "^0.160.0",
+    "cannon-es": "^0.20.0",
+    "gsap": "^3.12.0"
+  }
+}

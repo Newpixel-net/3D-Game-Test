@@ -1,10 +1,11 @@
 /**
- * Main Entry Point - AAA Wave-Based Survival Shooter
+ * Main Entry Point - Warzone - Tactical Survival Shooter
  */
 
 import { Game } from './core/Game.js';
 import { UIManager } from './managers/UIManager.js';
 import { AssetManager } from './managers/AssetManager.js';
+import { VERSION_CONFIG } from './config/version.config.js';
 
 let game = null;
 let uiManager = null;
@@ -12,11 +13,18 @@ let uiManager = null;
 // Initialize the game
 async function init() {
     try {
-        console.log('🎮 Initializing Survival Shooter...');
+        console.log(`🎮 Initializing ${VERSION_CONFIG.GAME_NAME} ${VERSION_CONFIG.DISPLAY_VERSION}...`);
+        console.log(`📦 Build: ${VERSION_CONFIG.FULL_VERSION} (${VERSION_CONFIG.BUILD_DATE})`);
 
         // Create UI Manager
         uiManager = new UIManager();
         uiManager.showLoadingScreen();
+
+        // Inject version info into UI
+        const versionDisplay = document.getElementById('versionDisplay');
+        if (versionDisplay) {
+            versionDisplay.textContent = VERSION_CONFIG.DISPLAY_VERSION;
+        }
 
         // Load all assets
         const assetManager = new AssetManager();
@@ -40,7 +48,7 @@ async function init() {
         // Setup menu event listeners
         setupMenuListeners();
 
-        console.log('🎮 Game ready! Press START to play');
+        console.log(`🎮 ${VERSION_CONFIG.GAME_NAME} ready! Press START to play`);
 
     } catch (error) {
         console.error('❌ Failed to initialize game:', error);

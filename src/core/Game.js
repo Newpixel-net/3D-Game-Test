@@ -96,6 +96,9 @@ export class Game {
         this.player.reset();
         this.clearAllEntities();
 
+        // Request pointer lock for mouse look (modern TPS controls)
+        this.inputManager.requestPointerLock();
+
         // Show HUD
         this.uiManager.showHUD();
         this.uiManager.updateHUD(this.stateManager.getGameState());

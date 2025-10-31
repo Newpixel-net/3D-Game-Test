@@ -273,6 +273,66 @@
             100% { opacity: 0; transform: translateY(-100px); }
         }
 
+        /* Crosshair for TPS aiming */
+        .crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .crosshair-center {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .crosshair-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .crosshair-line.top {
+            width: 2px;
+            height: 8px;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .crosshair-line.bottom {
+            width: 2px;
+            height: 8px;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .crosshair-line.left {
+            width: 8px;
+            height: 2px;
+            left: -14px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .crosshair-line.right {
+            width: 8px;
+            height: 2px;
+            right: -14px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
         @media (max-width: 768px) {
             .hud-container {
                 flex-direction: column;
@@ -297,7 +357,7 @@
             }
         }
     </style>
-  <script type="module" crossorigin src="/3D-Game-Test/assets/index-B-s4cRNy.js"></script>
+  <script type="module" crossorigin src="/3D-Game-Test/assets/index-r6STsPQm.js"></script>
   <link rel="modulepreload" crossorigin href="/3D-Game-Test/assets/three-D6emPfn2.js">
 </head>
 <body>
@@ -352,6 +412,15 @@
         <div class="wave-indicator hidden" id="waveIndicator">
             <div class="wave-label">WAVE</div>
             <div class="wave-number" id="waveNumber">1</div>
+        </div>
+
+        <!-- Crosshair -->
+        <div class="crosshair hidden" id="crosshair">
+            <div class="crosshair-center"></div>
+            <div class="crosshair-line top"></div>
+            <div class="crosshair-line bottom"></div>
+            <div class="crosshair-line left"></div>
+            <div class="crosshair-line right"></div>
         </div>
 
         <!-- Main Menu -->
